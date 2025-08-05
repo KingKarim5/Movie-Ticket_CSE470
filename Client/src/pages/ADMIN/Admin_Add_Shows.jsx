@@ -1,9 +1,12 @@
 import React from 'react';
 
-const ComponentName = () => {
+const Admin_Add_Shows = () => {
   return (
-    <div></div>
+    <div>
+      <h2>Add Show</h2>
+      <p>This page will allow you to add a new show.</p>
+    </div>
   );
 }
 
-export default ComponentName;
+export default Admin_Add_Shows;

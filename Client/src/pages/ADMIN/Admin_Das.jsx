@@ -1,9 +1,12 @@
 import React from 'react';
 
-const ComponentName = () => {
+const Admin_Das = () => {
   return (
-    <div></div>
+    <div>
+      <h2>Admin Dashboard</h2>
+      <p>Welcome to the admin dashboard! Here you can manage shows, bookings, and more.</p>
+    </div>
   );
 }
 
-export default ComponentName;
+export default Admin_Das;

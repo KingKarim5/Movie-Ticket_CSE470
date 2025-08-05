@@ -1,9 +1,12 @@
 import React from 'react';
 
-const ComponentName = () => {
+const List_Books = () => {
   return (
-    <div></div>
+    <div>
+      <h2>List Bookings</h2>
+      <p>This page will show all bookings.</p>
+    </div>
   );
 }
 
-export default ComponentName;
+export default List_Books;

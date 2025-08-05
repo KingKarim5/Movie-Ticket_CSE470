@@ -1,12 +1,12 @@
-// server.js
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import connectDB from './config/Database.js'; // Ensure this path is correct
-import { clerkMiddleware } from '@clerk/express'; // Clerk middleware
-import User from './models/User.js'; // Import User model
-import { inngest, functions } from './Inngest/Ind.js'; // Import Inngest client and functions
-import { serve } from 'inngest/express'; // Import Inngest express middleware
+import connectDB from './config/Database.js'; 
+import { clerkMiddleware } from '@clerk/express'; 
+import User from './models/User.js'; 
+import { inngest, functions } from './Inngest/Ind.js';
+import { serve } from 'inngest/express'; 
+import showRouter from './routes/showRouter.js'; 
 
 const app = express();
 const port = 3000;
@@ -17,12 +17,13 @@ await connectDB();
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(clerkMiddleware());  // Clerk middleware
+app.use(clerkMiddleware());  
 
 // Routes
 app.get('/', (req, res) => res.send('Server is Live.'));
-//From documentation
-app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use('/api/inngest', serve({ client: inngest, functions })); 
+app.use('/api/show', showRouter);
+
 // Webhook Route
 app.post('/webhook', async (req, res) => {
   const { body } = req;

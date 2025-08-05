@@ -1,0 +1,9 @@
+import express from 'express';
+import { getNowPlayingMovies } from './controllers/showController'; // Import your controller function
+
+const showRouter = express.Router();
+
+// Define the route and associate it with the controller function
+showRouter.get('/now-playing', getNowPlayingMovies);
+
+export default showRouter;
