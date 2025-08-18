@@ -1,9 +1,10 @@
 export const Dateformat = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleString('en-US', {
     weekday: 'short',
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-    minute: 'numeric',  // Corrected closing bracket for this object
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };

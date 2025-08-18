@@ -1,25 +1,21 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import Navbar from "../../components/admin/Navbar";
+import Sidebar from "../../components/admin/Sidebar";
 
 const Layout = () => {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside style={{ width: '220px', background: '#222', color: '#fff', padding: '2rem 1rem' }}>
-        <h2 style={{ color: '#fff' }}>Admin Panel</h2>
-        <nav>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li><Link to="/admin" style={{ color: '#fff', textDecoration: 'none' }}>Dashboard</Link></li>
-            <li><Link to="/admin/bookings" style={{ color: '#fff', textDecoration: 'none' }}>List Bookings</Link></li>
-            <li><Link to="/admin/shows" style={{ color: '#fff', textDecoration: 'none' }}>List Shows</Link></li>
-            <li><Link to="/admin/add-show" style={{ color: '#fff', textDecoration: 'none' }}>Add Show</Link></li>
-          </ul>
-        </nav>
-      </aside>
-      <main style={{ flex: 1, padding: '2rem', background: '#f4f4f4' }}>
-        <Outlet />
-      </main>
-    </div>
-  );
-}
+    return (
+      <>
+        <Navbar />
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 px-4 py-10 md:px-10 h-[calc(100vh-64px)] overflow-y-auto">
+            {/* This is where the child components will be rendered */}
+            <Outlet />
+          </div>
+        </div>
 
+      </>
+    )
+}
 export default Layout;

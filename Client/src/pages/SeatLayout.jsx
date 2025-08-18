@@ -4,8 +4,9 @@ import { dummyDateTimeData, dummyShowsData } from '../assets/assets';
 import { ArrowRightIcon, ClockIcon } from 'lucide-react';
 import ISOTimeFormat from '../libraries/ISOTimeformat'; 
 import Blurcircle from '../components/Blurcircle';
-import { assets } from '../assets/assets'; // Assuming this is the correct import for your assets
-import toast from 'react-hot-toast'; // Ensure you have react-hot-toast installed
+import { assets } from '../assets/assets';
+import toast from 'react-hot-toast';
+import { t } from '../libraries/i18n';
 
 const SeatLayout = () => {
   const groupRows = [
@@ -38,10 +39,10 @@ const SeatLayout = () => {
 
   const handleSeatClick = (seatId) => {
     if (!selectedTime) {
-      return toast('Please select a time first');
+      return toast(t('pleaseSelectTime'));
     }
     if (!selectedSeats.includes(seatId) && selectedSeats.length >= 4) {
-      return toast('You can only select up to 4 seats');
+      return toast(t('maxSeatsReached'));
     }
     setSelectedSeats(prev => {
       return prev.includes(seatId)
@@ -75,15 +76,31 @@ const SeatLayout = () => {
     setSelectedTime(time);
   };
 
+  const handleCheckout = () => {
+    if (!selectedTime) {
+      return toast.error(t('pleaseSelectTime'));
+    }
+    if (selectedSeats.length === 0) {
+      return toast.error('Please select at least one seat');
+    }
+
+    // Save selected seats and time to localStorage
+    localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+    localStorage.setItem('selectedTime', JSON.stringify(selectedTime));
+    
+    // Navigate to checkout page
+    navigate(`/checkout/${id}/${date}`);
+  };
+
   if (!show) {
-    return <div className="flex items-center justify-center min-h-screen text-2xl text-white">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen text-2xl text-white">{t('loading')}</div>;
   }
 
   return (
     <div className="flex flex-col md:flex-row px-6 md:px-16 lg:px-40 py-30 md:pt-50 bg-black text-white">
       {/* Timings */}
       <div className="w-60 bg-black text-white border border-purple-500 rounded-lg py-10 h-max md:sticky md:top-30">
-        <p className="text-lg font-semibold px-6">Available Timings</p>
+        <p className="text-lg font-semibold px-6">{t('availableTimings')}</p>
         <div>
           {show.dateTime[date]?.map((time, index) => (
             <div
@@ -105,9 +122,9 @@ const SeatLayout = () => {
       <div className="relative flex-1 flex flex-col items-center max-md:mt-16">
         <Blurcircle top="-100px" left="-100px" />
         <Blurcircle bottom="0px" right="0px" />
-        <h1 className="text-2xl font-semibold mb-4">Select Seats</h1>
+        <h1 className="text-2xl font-semibold mb-4">{t('selectSeats')}</h1>
         <img src={assets.screenImage} alt="screen" className="w-full max-w-lg" />
-        <p className="text-gray-400 text-sm mb-6">Select your preferred seats below:</p>
+        <p className="text-gray-400 text-sm mb-6">{t('selectYourPreferredSeats')}</p>
 
         {/* Render Seats */}
         <div className="flex flex-col items-center mt-10 text-xs text-gray-300">
@@ -128,10 +145,10 @@ const SeatLayout = () => {
       {/* Checkout Button (Positioned Horizontally) */}
       <div className="flex justify-center mt-8">
         <button 
-          onClick={() => navigate('/mybookings')} // Correctly navigating to the booking page
+          onClick={handleCheckout}
           className="flex items-center justify-center gap-2 bg-purple-600 text-white py-1 px-4 rounded-md text-sm mx-auto hover:bg-red-600 transition-colors duration-300"
         >
-          Checkout
+          {t('proceedToCheckout')}
           <ArrowRightIcon strokeWidth={3} className='w-4 h-4' />
         </button>
       </div>

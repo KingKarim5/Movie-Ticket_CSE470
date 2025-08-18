@@ -5,7 +5,9 @@ import Blurcircle from '../components/Blurcircle';
 import { Heart, PlayCircleIcon, StarIcon } from 'lucide-react';
 import timeFormat from '../libraries/timeformat';
 import Selectdate from '../components/Selectdate';
-import Loading from '../components/loading'; // Corrected import
+import Loading from '../components/loading';
+import ReactPlayer from 'react-player';
+import { t } from '../libraries/i18n';
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -42,14 +44,21 @@ const MovieDetails = () => {
   }, [id]);
 
   if (show === null) {
-    return <Loading />; // Render the Loading component when no show is found
+    return <Loading />;
   }
 
   const recommendedMovies = getRecommendedMovies();
 
   const handleBuyTicket = (movieId) => {
     navigate(`/movies/${movieId}`);
-    scrollTo(0, 0); // Scroll to the top
+    scrollTo(0, 0);
+  };
+
+  const scrollToTrailer = () => {
+    const trailerSection = document.getElementById('trailer-section');
+    if (trailerSection) {
+      trailerSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return show ? (
@@ -68,7 +77,7 @@ const MovieDetails = () => {
           </h1>
           <div className="flex items-center gap-2 text-gray-300">
             <StarIcon className="w-5 h-5 text-primary fill-primary" />
-            {show.movie.vote_average.toFixed(1)} User Rating
+            {show.movie.vote_average.toFixed(1)} {t('userRating')}
           </div>
           <p className="text-gray-400 mt-2 text-sm leading-tight max-w-xl">
             {show.movie.overview}
@@ -79,22 +88,25 @@ const MovieDetails = () => {
             {new Date(show.movie.release_date.split('-')[0]).getFullYear()}
           </p>
           <div className="flex items-center gap-x-4">
-            <button className="flex items-center gap-x-2 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
+            <button 
+              onClick={scrollToTrailer}
+              className="flex items-center gap-x-2 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition"
+            >
               <PlayCircleIcon className="w-5 h-5" />
-              Watch Trailer
+              {t('watchTrailer')}
             </button>
             <a
               href="#selectdate"
               onClick={(e) => {
-                e.preventDefault(); // Prevent default anchor behavior
+                e.preventDefault();
                 const section = document.getElementById('selectdate');
                 if (section) {
-                  section.scrollIntoView({ behavior: 'smooth' }); // Smooth scrolling
+                  section.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
               className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition inline-flex items-center"
             >
-              Buy Ticket
+              {t('buyTicket')}
             </a>
             <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
               <Heart className="w-5 h-5" />
@@ -102,7 +114,7 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
-      <p>Your Favourite Casts</p>
+      <p>{t('yourFavouriteCasts')}</p>
       <div className="overflow-x-auto no-scrollbar mt-8 pb-4">
         <div className="flex items-center gap-4 w-max px-4">
           {show.movie.casts.slice(0, 12).map((cast, index) => (
@@ -122,7 +134,7 @@ const MovieDetails = () => {
       {/* Recommended Movies Section */}
       {recommendedMovies.length > 0 && (
         <div className="mt-16">
-          <h2 className="text-2xl font-semibold text-white">You May Also Like</h2> {/* Updated text color to white */}
+          <h2 className="text-2xl font-semibold text-white">{t('youMayAlsoLike')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
             {recommendedMovies.slice(0, 4).map((movie) => (
               <div key={movie.id} className="flex flex-col items-center transform transition-transform hover:scale-105 hover:shadow-xl">
@@ -140,7 +152,7 @@ const MovieDetails = () => {
                     onClick={() => handleBuyTicket(movie.id)}
                     className="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition-all cursor-pointer"
                   >
-                    Buy Ticket
+                    {t('buyTicket')}
                   </button>
                   <button className="text-yellow-400 hover:text-yellow-500">
                     <Heart className="w-5 h-5" />
@@ -155,9 +167,49 @@ const MovieDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Trailer Section */}
+      <div id="trailer-section" className="mt-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-4">{t('watchTrailer')}</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Watch the official trailer for {show.movie.title} and get a glimpse of the action, drama, and excitement that awaits you.
+          </p>
+        </div>
+        
+        <div className="relative max-w-4xl mx-auto">
+          <Blurcircle top="-50px" left="-50px" />
+          <Blurcircle bottom="-50px" right="-50px" />
+          
+          <div className="relative bg-black rounded-xl overflow-hidden shadow-2xl">
+            <ReactPlayer
+              url="https://www.youtube.com/watch?v=4LiHg8nUlFw"
+              controls={true}
+              width="100%"
+              height="500px"
+              className="mx-auto"
+              config={{
+                youtube: {
+                  playerVars: {
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0
+                  }
+                }
+              }}
+            />
+          </div>
+          
+          <div className="mt-6 text-center">
+            <p className="text-gray-400 text-sm">
+              {t('watchTrailer')} • {show.movie.title} • {new Date(show.movie.release_date).getFullYear()}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   ) : (
-    <Loading /> // Use the Loading component for the loading state or no movie found
+    <Loading /> 
   );
 };
 
