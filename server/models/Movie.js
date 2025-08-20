@@ -1,22 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
-const movieSchema = new mongoose.Schema(
-  {
+const movieSchema = new Schema({
     _id: { type: String, required: true },
-    title: { type: String, required: true },
-    overview: { type: String, required: true },
-    poster_path: { type: String, required: true },
-    release_date: { type: String, required: true },
-    original_language: { type: String },
-    tagline: { type: String },
+    originalTitle: { type: String, required: true },
+    description: { type: String, required: true },
+    primaryImage: { type: String, required: true },
+    thumbnails: { type: Array, required: true },
+    trailer: {type: String},
+    releaseDate: { type: String, required: true },
+    original_language: { type: Array },
     genres: { type: Array, required: true },
     casts: { type: Array, required: true },
-    vote_average: { type: Number, required: true },
-    runtime: { type: Number, required: true },
-  },
-  { timestamps: true } // This should be inside the schema object
-);
+    averageRating: { type: Number},
+    runtime: { type: Number},
+    numVotes: { type: Number}
+}, { timestamps: true })
 
-// Export the model
-const Movie = mongoose.model("Movie", movieSchema);
-export default Movie;
+export default mongoose.model('Movie', movieSchema);

@@ -16,9 +16,13 @@ import Admin_Das from './pages/ADMIN/Admin_Das';
 import List_Books from './pages/ADMIN/List_Books';
 import List_Shows from './pages/ADMIN/List_Shows';
 import Admin_Add_Shows from './pages/ADMIN/Admin_Add_Shows';
+import { useAppContext } from './context/Appcontext';
+import { SignIn } from '@clerk/clerk-react';
 
 const App = () => {
   const isAdminRoute = useLocation().pathname.startsWith('/admin');
+
+  const { user } = useAppContext()
   
   return (
     <>
@@ -33,7 +37,12 @@ const App = () => {
         <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/favourite" element={<Favourite />} /> 
         {/* Admin routes */}
-        <Route path='/admin' element={<Layout/>}>
+        <Route path='/admin/*' element={user ? <Layout/> : (
+            <div className='min-h-screen flex justify-center items-center'>
+              <SignIn fallbackRedirectUrl={'/admin'}/>
+            </div>
+          )
+        }>
           <Route index element={<Admin_Das />} />
           <Route path="bookings" element={<List_Books />} />
           <Route path="shows" element={<List_Shows />} />

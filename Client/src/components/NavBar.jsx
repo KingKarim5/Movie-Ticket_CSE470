@@ -1,11 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { MenuIcon, SearchIcon, XIcon, HomeIcon, Building2Icon, CalendarIcon, HeartIcon, TicketPlus } from 'lucide-react';
 import React, { useState } from 'react';
-import movifyLogo from '../assets/movifylogo.png'; // <-- Import your logo here
+import movifyLogo from '../assets/Movifylogo.png';
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
 import SearchBar from './SearchBar';
 import LanguageSelector from './LanguageSelector';
 import { t } from '../libraries/i18n';
+import { useAppContext } from '../context/Appcontext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,8 @@ const Navbar = () => {
   const { user } = useUser();
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
+
+  const { favoriteMovies } = useAppContext()
 
   return (
     <>
@@ -33,7 +36,9 @@ const Navbar = () => {
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/movie" className="text-black">{t('movie')}</Link>
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/" className="text-black">{t('theatres')}</Link>
         <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/" className="text-black">{t('releases')}</Link>
-        <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/favourite" className="text-black">{t('favourites')}</Link>
+        {Array.isArray(favoriteMovies) && favoriteMovies.length > 0 && (
+          <Link onClick={() => { scrollTo(0, 0); setIsOpen(false); }} to="/favourite" className="text-black">{t('favourites')}</Link>
+        )}
         <SearchIcon 
           className="md:hidden w-6 h-6 cursor-pointer hover:text-red-500 transition-colors" 
           onClick={() => {

@@ -437,3 +437,5 @@ export const initializeLanguage = () => {
   const currentLang = getCurrentLanguage();
   setLanguage(currentLang);
 };
+
+

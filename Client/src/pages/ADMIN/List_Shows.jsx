@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import All_Page_Title from '../../components/admin/All_Page_Title';
 import { dummyShowsData } from '../../assets/assets';
-import Loading from '../../components/Loading'; // optional, if you have a loading component
+import Loading from '../../components/loading'; // optional, if you have a loading component
+import { useAppContext } from '../../context/Appcontext';
 import { Dateformat } from '../../libraries/Dateformat';
 
 const List_Shows = () => {
   const currency = import.meta.env.VITE_CURRENCY;
+  const { axios, getToken, user} = useAppContext()
   const [shows, setShows] = useState([]);
   const [loading, setLoading] = useState(true);
 

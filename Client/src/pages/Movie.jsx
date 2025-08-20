@@ -1,12 +1,12 @@
 import React from 'react';
-import { dummyShowsData } from '../assets/assets';
 import Blurcircle from '../components/Blurcircle';
 import MovieCard from '../components/moviecard';
+import { useAppContext } from '../context/Appcontext';
 
 const Movies = () => {
-  const hasMovies = dummyShowsData.length > 0;
+  const{ shows } = useAppContext()
 
-  return hasMovies ? (
+  return shows.length > 0 ? (
     <div className="relative my-40 mb-60 px-6 md:px-16 lg:px-40 xl:px-44 overflow-hidden min-h-[80vh] bg-black text-white">
       {/* Purple glow effects */}
       <Blurcircle top="150px" left="0px" color="purple" />
@@ -17,7 +17,7 @@ const Movies = () => {
       </h1>
 
       <div className="flex flex-wrap max-sm:justify-center gap-4">
-        {dummyShowsData.map((movie) => (
+        {shows.map((movie) => (
           <MovieCard movie={movie} key={movie.id} />
         ))}
       </div>

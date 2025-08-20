@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { dummyBookingData } from '../../assets/assets';
 import All_Page_Title from '../../components/admin/All_Page_Title';
-import Loading from '../../components/Loading';
+import Loading from '../../components/loading';
 import { Dateformat } from '../../libraries/Dateformat';
+import { useAppContext } from '../../context/Appcontext';
 
 const List_Books = () => {
   const currency = import.meta.env.VITE_CURRENCY || '$';
+  const { axios, getToken, user} = useAppContext()
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const getAllBookings = async () => {
     try {
-      setBookings(dummyBookingData);
-      setLoading(false);
+      const { data } = await axios.get('/api/admin/all-bookings', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        setBookings(data.bookings || []);
+        setLoading(false);
+      } else {
+        setBookings([]);
+        setLoading(false);
+      }
     } catch (error) {
       console.error(error);
       setLoading(false);
@@ -20,8 +31,10 @@ const List_Books = () => {
   };
 
   useEffect(() => {
-    getAllBookings();
-  }, []);
+    if (user) {
+      getAllBookings();
+    }
+  }, [user]);
 
   if (loading) return <Loading />;
 
@@ -52,9 +65,7 @@ const List_Books = () => {
                 <td className="p-2 pl-5">{item.user?.name || 'N/A'}</td>
                 <td className="p-2">{item.show?.movie?.title || 'Untitled'}</td>
                 <td className="p-2">{Dateformat(item.show?.showDateTime)}</td>
-                <td className="p-2">
-                  {(item.bookedSeats ? Object.values(item.bookedSeats) : []).join(', ')}
-                </td>
+                <td className="p-2">{Array.isArray(item.bookedseats) ? item.bookedseats.join(', ') : ''}</td>
                 <td className="p-2">{currency}{item.amount}</td>
               </tr>
             ))}

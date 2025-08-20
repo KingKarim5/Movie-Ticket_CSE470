@@ -1,11 +1,13 @@
 import { ChartLineIcon, CircleDollarSignIcon, PlayCircleIcon, StarIcon, UserIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { dummyDashboardData } from '../../assets/assets';
 import All_Page_Title from '../../components/admin/All_Page_Title';
-import Loading from '../../components/Loading';
+import Loading from '../../components/loading';
 import { Dateformat } from '../../libraries/Dateformat';
+import toast from 'react-hot-toast';
+import { useAppContext } from '../../context/Appcontext';
 
 const Admin_Das = () => {
+  const { axios, getToken, user, image_base_url} = useAppContext()
   const currency = import.meta.env.VITE_CURRENCY || '$';
   
   const [DashboardData, setDashboardData] = useState({
@@ -30,13 +32,31 @@ const Admin_Das = () => {
   ];
 
   const fetchDashboardData = async () => {
-    setDashboardData(dummyDashboardData);
-    setLoading(false);
-  };
+      try {
+      const { data } = await axios.get('/api/admin/dashboarddata', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        setDashboardData(data.dashboarddata);
+        setLoading(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Error fetching dashboard data", error)
+      console.log(error);
+    }
+  }
+
+   
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loading) {
@@ -111,7 +131,7 @@ const Admin_Das = () => {
               text-white shadow-lg
             `}
           >
-            <img src={show.movie.poster_path} alt={show.movie.title} className='h-60 w-full object-cover'/>
+            <img src={image_base_url + show.movie.poster_path} alt={show.movie.title} className='h-60 w-full object-cover'/>
             <p className='font-medium p-2 truncate'>{show.movie.title}</p>
             <div className='flex items-center justify-between px-2'>
               <p className='text-lg font-medium'>{currency}{show.showPrice.toLocaleString()}</p>

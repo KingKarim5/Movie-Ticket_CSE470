@@ -1,20 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { dummyShowsData } from '../../assets/assets';
+// removed dummyShowsData import
 import All_Page_Title from '../../components/admin/All_Page_Title';
 import { Converter } from '../../libraries/Converter';
 import { CheckIcon, StarIcon } from 'lucide-react';
+import { useAppContext } from '../../context/Appcontext';
+import toast from 'react-hot-toast';
 
 const Admin_Add_Shows = () => {
+  const { axios, getToken, user, image_base_url} = useAppContext()
   const currency = import.meta.env.VITE_CURRENCY || '$';
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [dateTimeSelection, setDateTimeSelection] = useState({});
   const [dateTimeInput, setDateTimeInput] = useState('');
   const [showPrice, setShowPrice] = useState('');
+  const [addingShow, setAddingShow] = useState(false)
+
+  const fetchNowPlayingMovies = async () => {
+    try {
+      const { data } = await axios.get('/api/show/now-playing', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+
+      if (data.success) {
+        setNowPlayingMovies(data.movies)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
-    setNowPlayingMovies(dummyShowsData);
-  }, []);
+    if (user) {
+      fetchNowPlayingMovies();
+    }
+  }, [user]);
 
   const handleAddDateTime = () => {
     if (!dateTimeInput) return;
@@ -43,6 +67,42 @@ const Admin_Add_Shows = () => {
       return { ...prev, [date]: filteredTimes };
     });
   };
+  const handleSubmit = async () => {
+    try {
+
+      setAddingShow(true)
+      if (!selectedMovie || Object.entries(dateTimeSelection).length === 0 || !showPrice) {
+        return toast.error('Missing required fields')
+      }
+      const showsInput = Object.entries(dateTimeSelection).map(([date, times]) => ({ date, time: times }))
+      
+      const payload = {
+        movieId: selectedMovie,
+        showsInput,
+        showprice: Number(showPrice)
+      }
+      const { data } = await axios.post('/api/show/add', payload, {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        toast.success(data.message);
+        setSelectedMovie(null);
+        setDateTimeInput('');
+        setDateTimeSelection({});
+        setShowPrice('');
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Submission error",error)
+      toast.error('An error occured. Please try again!')
+    }
+    setAddingShow(false)
+  }
+
+  // initial fetch handled in the effect above
 
   return nowPlayingMovies.length > 0 ? (
     <>
@@ -62,9 +122,8 @@ const Admin_Add_Shows = () => {
             onClick={() => setSelectedMovie(movie.id)}
           >
             <div className="relative rounded-lg overflow-hidden bg-black">
-              <img
-                src={movie.poster_path}
-                alt={movie.title}
+              <img src={image_base_url + movie.poster_path}
+                alt={''}
                 className="w-full h-52 object-cover brightness-90 rounded-lg"
               />
               <div className="text-sm flex items-center justify-between p-2 bg-black/70 w-full absolute bottom-0 left-0 rounded-b-lg">
@@ -116,6 +175,7 @@ const Admin_Add_Shows = () => {
           />
           <button
             onClick={handleAddDateTime}
+            disabled={addingShow}
             className="px-4 py-2 bg-red-600 hover:bg-purple-700 text-white rounded-md"
           >
             Add Time
@@ -146,6 +206,15 @@ const Admin_Add_Shows = () => {
             </li>
           ))}
         </ul>
+      </div>
+      <div className="mt-6">
+        <button
+          onClick={handleSubmit}
+          disabled={addingShow}
+          className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-md"
+        >
+          Create Shows
+        </button>
       </div>
     </>
   ) : null;

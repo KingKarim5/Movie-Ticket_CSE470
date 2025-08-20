@@ -6,7 +6,10 @@ import { clerkMiddleware } from '@clerk/express';
 // import User from './models/User.js'; 
 import { inngest, functions } from './Inngest/Ind.js';
 import { serve } from 'inngest/express'; 
-// import showRouter from './routes/showRouter.js'; 
+import showRouter from './Routes/Show routes.js'; 
+import bookingRouter from './Routes/booking routes.js';
+import adminRouter from './Routes/Admin routes.js';
+import userRouter from './Routes/User routes.js';
 
 const app = express();
 const port = 3000;
@@ -22,7 +25,10 @@ app.use(clerkMiddleware());
 // Routes
 app.get('/', (req, res) => res.send('Server is Live!'));
 app.use('/api/inngest', serve({ client: inngest, functions })); 
-// app.use('/api/show', showRouter);
+app.use('/api/show', showRouter);
+app.use('/api/booking', bookingRouter )
+app.use('/api/admin',adminRouter)
+app.use('/api/user',userRouter)
 
 // Webhook Route
 // app.post('/webhook', async (req, res) => {

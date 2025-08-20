@@ -8,29 +8,49 @@ import Selectdate from '../components/Selectdate';
 import Loading from '../components/loading';
 import ReactPlayer from 'react-player';
 import { t } from '../libraries/i18n';
+import { useAppContext } from '../context/Appcontext';
 
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [show, setShow] = useState(null);
+  const { shows, axios, getToken, user, fetchfavoriteMovies, favoriteMovies, image_base_url} = useAppContext()
 
-  const getShow = () => {
-    const foundShow = dummyShowsData.find((show) => show._id === id);
-    if (foundShow) {
-      setShow({
-        movie: foundShow,
-        dateTime: dummyDateTimeData,
-      });
-    } else {
-      console.error('No show found with the given ID');
-      setShow(null);
+const getShow = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/${id}`)
+      if (data.success) {
+        setShow(data)
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
+  const handlefavorite = async () => {
+    try {
+      if (!user) {
+        return toast.error('Please login to proceed');
+      }
+      const { data } = await axios.post('/api/user/updatefavorites', { movieId: id }, {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      })
+      if (data.success) {
+        await fetchfavorites();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } 
   // Get recommended movies based on genre
   const getRecommendedMovies = () => {
     if (show) {
-      return dummyShowsData.filter(
+      return show.filter(
         (movie) => movie._id !== id && movie.genres.some((genre) => 
           show.movie.genres.map((g) => g.name).includes(genre.name)
         )
@@ -65,7 +85,7 @@ const MovieDetails = () => {
     <div className="px-6 md:px-16 lg:px-40 pt-30 md:pt-50">
       <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
         <img
-          src={show.movie.poster_path}
+          src={image_base_url + show.movie.poster_path}
           alt={`${show.movie.title} poster`}
           className="max-md:auto rounded-xl h-104 max-w-70 object-cover"
         />
@@ -108,8 +128,8 @@ const MovieDetails = () => {
             >
               {t('buyTicket')}
             </a>
-            <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
-              <Heart className="w-5 h-5" />
+            <button href="#cast" onClick={handleDate} className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
+              <Heart  className={`w-5 h-5 ${favorites.find(movie => movie._id === id) ?  ' text-primary fill-primary' : ''}`}/>
             </button>
           </div>
         </div>
@@ -120,7 +140,7 @@ const MovieDetails = () => {
           {show.movie.casts.slice(0, 12).map((cast, index) => (
             <div key={index} className="flex flex-col items-center text-center">
               <img
-                src={cast.profile_path}
+                src={image_base_url + cast.profile_path}
                 alt={cast.name}
                 className="rounded-full h-20 md:h-20 aspect-square object-cover"
               />

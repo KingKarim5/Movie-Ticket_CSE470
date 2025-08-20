@@ -1,10 +1,11 @@
 import React from 'react';
-import { dummyShowsData } from '../assets/assets';
 import Blurcircle from '../components/Blurcircle';
 import MovieCard from '../components/moviecard';
+import { useAppContext } from '../context/Appcontext';
 
 const Favourite = () => {
-  return dummyShowsData.length > 0 ? (
+  const { favoritemovies } = useAppContext()
+  return favoritemovies.length > 0 ? (
     <div className="relative my-40 mb-60 px-6 md:px-16 lg:px-40 xl:px-44 overflow-hidden min-h-[80vh]">
       <Blurcircle top="150px" left="0px" />
       <Blurcircle bottom="50px" right="50px" />
