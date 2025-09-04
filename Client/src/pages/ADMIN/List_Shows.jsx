@@ -13,18 +13,12 @@ const List_Shows = () => {
 
   const getShows = async () => {
     try {
-      setShows([
-        {
-          movie: dummyShowsData[0],
-          showDateTime: '2025-06-30T02:30:00.000Z',
-          showPrice: 59,
-          occupiedSeats: {
-            A1: 'user_1',
-            B1: 'user_2',
-            C1: 'user_3',
-          },
-        },
-      ]);
+      const { data } = await axios.get('/api/admin/all-shows', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`
+        }
+      });
+      setShows(data.showdata);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -32,8 +26,10 @@ const List_Shows = () => {
   };
 
   useEffect(() => {
-    getShows();
-  }, []);
+    if(user) {
+      getShows();
+    }
+  }, [user]);
 
   if (loading) {
     return <Loading />; // optional fallback
@@ -65,7 +61,7 @@ const List_Shows = () => {
                 <td className="p-2 pl-5">{show.movie.title}</td>
                 <td className="p-2">{Dateformat(show.showDateTime)}</td>
                 <td className="p-2">{Object.keys(show.occupiedSeats).length}</td>
-                <td className="p-2">{currency}{Object.keys(show.occupiedSeats).length * show.showPrice}</td>
+                <td className="p-2">{currency}{Object.keys(show.occupiedSeats).length * (show.showPrice ?? show.showprice)}</td>
               </tr>
             ))}
           </tbody>

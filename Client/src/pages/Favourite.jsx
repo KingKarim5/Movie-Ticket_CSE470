@@ -4,55 +4,40 @@ import MovieCard from '../components/moviecard';
 import { useAppContext } from '../context/Appcontext';
 
 const Favourite = () => {
-  const { favoritemovies } = useAppContext()
-  return favoritemovies.length > 0 ? (
-    <div className="relative my-40 mb-60 px-6 md:px-16 lg:px-40 xl:px-44 overflow-hidden min-h-[80vh]">
-      <Blurcircle top="150px" left="0px" />
-      <Blurcircle bottom="50px" right="50px" />
+  const { favoriteMovies, image_base_url } = useAppContext()
+  
+  // Add safety check for undefined favoriteMovies
+  if (!favoriteMovies) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+        <h1 className="text-3xl font-bold text-center text-purple-400 mb-8 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
+          Loading...
+        </h1>
+      </div>
+    );
+  }
+  
+  return favoriteMovies.length > 0 ? (
+    <div className="relative my-40 mb-60 px-6 md:px-16 lg:px-40 xl:px-44 overflow-hidden min-h-[80vh] bg-black text-white">
+      <Blurcircle top="150px" left="0px" color="purple" />
+      <Blurcircle bottom="50px" right="50px" color="purple" />
 
-      <h1 className="text-4xl font-bold text-center text-red-500 mb-8 font-cursive italic tracking-wide shadow-lg uppercase">
+      <h1 className="text-4xl font-bold text-center text-purple-400 mb-8 font-cursive italic tracking-wide shadow-lg uppercase drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
         Your Favourites
       </h1>
 
       <div className="flex flex-wrap max-sm:justify-center gap-4">
-        {dummyShowsData.map((movie, index) => (
-          <div
-            key={movie.id}
-            className={`
-              w-[220px] rounded-lg overflow-hidden pb-3
-              ${index % 2 === 0 
-                ? 'bg-gradient-to-br from-purple-900 to-black' 
-                : 'bg-gradient-to-br from-black to-purple-800'
-              }
-              border border-purple-700 hover:-translate-y-1 transition-transform duration-300
-              text-white shadow-lg
-            `}
-          >
-            {/* Movie Poster */}
-            <img
-              src={movie.poster_path}
-              alt={movie.title}
-              className="h-60 w-full object-cover"
-            />
-
-            {/* Title */}
-            <p className="font-medium p-2 truncate">{movie.title}</p>
-
-            {/* Optional Extra Info */}
-            {movie.vote_average && (
-              <div className="flex items-center justify-between px-2">
-                <p className="text-sm text-gray-300 italic">
-                  Rating: {movie.vote_average.toFixed(1)}
-                </p>
-              </div>
-            )}
-          </div>
+        {favoriteMovies.map((movie) => (
+          <MovieCard movie={movie} key={movie._id} />
         ))}
       </div>
     </div>
   ) : (
-    <div className="text-center text-gray-600">
-      No favourite movies available.
+    <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+      <h1 className="text-3xl font-bold text-center text-purple-400 mb-8 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
+        No favourite movies available.
+      </h1>
+      <p className="text-gray-400">Add some movies to your favorites to see them here!</p>
     </div>
   );
 };

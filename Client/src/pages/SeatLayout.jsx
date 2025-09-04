@@ -22,8 +22,10 @@ const SeatLayout = () => {
   // ✅ Fetch show details
   const getShow = async () => {
     try {
-      const { data } = await axios.get(`/api/show/getmovie/${id}`);
-      if (data.success) setShow(data);
+      const { data } = await axios.get(`/api/show/${id}`);
+      if (data.success) {
+        setShow(data);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -33,8 +35,11 @@ const SeatLayout = () => {
   const getOccupiedSeats = async () => {
     try {
       const { data } = await axios.get(`/api/booking/seats/${selectedTime.showId}`);
-      if (data.success) setOccupiedSeats(data.occupiedSeats);
-      else toast.error(data.message);
+      if (data.success) {
+        setOccupiedSeats(data.occupiedSeats);
+      }else {
+        toast.error(data.message);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -61,16 +66,57 @@ const SeatLayout = () => {
       console.log(error);
     }
   };
+  const bookTickets = async () => {
+    try {
+      if (!user) {
+        return toast.error("Please login to proceed!");
+      }
+      if (!selectedTime || !selectedSeats.length)
+        return toast.error("Please select a time and a seats");
 
-  useEffect(() => { getShow(); }, [id]);
-  useEffect(() => { if (selectedTime) getOccupiedSeats(); }, [selectedTime]);
+      const { data } = await axios.post(
+        "/api/booking/create",
+        {
+          showId: selectedTime.showId,
+          selectedSeats,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      if (data.success && data.bookingId) {
+        toast.success('Proceed to payment')
+        navigate(`/pay/${data.bookingId}`)
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
-  const handleSeatClick = (seatId) => {
-    if (!selectedTime) return toast(t('pleaseSelectTime'));
-    if (!selectedSeats.includes(seatId) && selectedSeats.length >= 5) return toast(t('maxSeatsReached'));
-    if (occupiedSeats.includes(seatId)) return toast.error('Seat is already booked');
+  useEffect(() => {
+    getShow();
+  }, [id]);
+  useEffect(() => { 
+    if (selectedTime) {
+      getOccupiedSeats() 
+    }
+   }, [selectedTime]);
 
-    setSelectedSeats(prev => prev.includes(seatId) ? prev.filter(seat => seat !== seatId) : [...prev, seatId]);
+   const handleSeatClick = (seatId) => {
+    if (!selectedTime) {
+      return toast("Please select a time first");
+    }
+    if (!selectedSeats.includes(seatId) && selectedSeats.length >= 4) {
+      return toast("You can only select 4 seats!");
+    }
+    if (occupiedSeats.includes(seatId)) {
+      return toast("This seat is already booked!");
+    }
+    setSelectedSeats((prev) =>
+      prev.includes(seatId)
+        ? prev.filter((seat) => seat !== seatId)
+        : [...prev, seatId]
+    );
   };
 
   const renderSeats = (row, count = 9) => (
@@ -143,7 +189,7 @@ const SeatLayout = () => {
       {/* Checkout */}
       <div className="flex justify-center mt-8">
         <button 
-          onClick={createBooking}
+          onClick={bookTickets}
           className="flex items-center gap-2 bg-purple-600 text-white py-2 px-6 rounded-md text-sm hover:bg-red-600 transition-colors duration-300"
         >
           {t('proceedToCheckout')}

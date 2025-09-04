@@ -6,14 +6,16 @@ import { Heart, PlayCircleIcon, StarIcon } from 'lucide-react';
 import timeFormat from '../libraries/timeformat';
 import Selectdate from '../components/Selectdate';
 import Loading from '../components/loading';
-import ReactPlayer from 'react-player';
 import { t } from '../libraries/i18n';
 import { useAppContext } from '../context/Appcontext';
+import toast from 'react-hot-toast';
 
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [show, setShow] = useState(null);
+  const [useIframeFallback, setUseIframeFallback] = useState(false);
+  const [trailerKey, setTrailerKey] = useState(null);
   const { shows, axios, getToken, user, fetchfavoriteMovies, favoriteMovies, image_base_url} = useAppContext()
 
 const getShow = async () => {
@@ -32,13 +34,13 @@ const getShow = async () => {
       if (!user) {
         return toast.error('Please login to proceed');
       }
-      const { data } = await axios.post('/api/user/updatefavorites', { movieId: id }, {
+      const { data } = await axios.post('/api/user/update-favorites', { movieId: id }, {
         headers: {
           Authorization: `Bearer ${await getToken()}`
         }
       })
       if (data.success) {
-        await fetchfavorites();
+        await fetchfavoriteMovies();
         toast.success(data.message);
       } else {
         toast.error(data.message);
@@ -49,8 +51,8 @@ const getShow = async () => {
   } 
   // Get recommended movies based on genre
   const getRecommendedMovies = () => {
-    if (show) {
-      return show.filter(
+    if (shows && show) {
+      return shows.filter(
         (movie) => movie._id !== id && movie.genres.some((genre) => 
           show.movie.genres.map((g) => g.name).includes(genre.name)
         )
@@ -61,6 +63,17 @@ const getShow = async () => {
 
   useEffect(() => {
     getShow();
+  }, [id]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(`/api/show/${id}/trailer`);
+        if (res.data?.success) setTrailerKey(res.data.key);
+      } catch (e) {
+        console.log('Trailer load error', e);
+      }
+    })();
   }, [id]);
 
   if (show === null) {
@@ -105,7 +118,7 @@ const getShow = async () => {
           <p>
             {timeFormat(show.movie.runtime)} |{' '}
             {show.movie.genres.map((genre) => genre.name).join(' , ')} |{' '}
-            {new Date(show.movie.release_date.split('-')[0]).getFullYear()}
+            {new Date(show.movie.releaseDate).getFullYear()}
           </p>
           <div className="flex items-center gap-x-4">
             <button 
@@ -128,8 +141,8 @@ const getShow = async () => {
             >
               {t('buyTicket')}
             </a>
-            <button href="#cast" onClick={handleDate} className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
-              <Heart  className={`w-5 h-5 ${favorites.find(movie => movie._id === id) ?  ' text-primary fill-primary' : ''}`}/>
+            <button href="#cast" onClick={handlefavorite} className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-700 transition">
+              <Heart  className={`w-5 h-5 ${favoriteMovies.find(movie => movie._id === id) ?  ' text-primary fill-primary' : ''}`}/>
             </button>
           </div>
         </div>
@@ -149,7 +162,7 @@ const getShow = async () => {
           ))}
         </div>
       </div>
-      <Selectdate dateTime={show.dateTime} id={id} />
+      <Selectdate dateTime={show.datetime} id={id} />
 
       {/* Recommended Movies Section */}
       {recommendedMovies.length > 0 && (
@@ -157,9 +170,9 @@ const getShow = async () => {
           <h2 className="text-2xl font-semibold text-white">{t('youMayAlsoLike')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
             {recommendedMovies.slice(0, 4).map((movie) => (
-              <div key={movie.id} className="flex flex-col items-center transform transition-transform hover:scale-105 hover:shadow-xl">
+              <div key={movie._id} className="flex flex-col items-center transform transition-transform hover:scale-105 hover:shadow-xl">
                 <img
-                  src={movie.poster_path}
+                  src={image_base_url + movie.poster_path}
                   alt={movie.title}
                   className="rounded-xl h-52 w-full object-cover"
                 />
@@ -169,7 +182,7 @@ const getShow = async () => {
                 {/* Movie actions */}
                 <div className="mt-2 flex items-center gap-3">
                   <button
-                    onClick={() => handleBuyTicket(movie.id)}
+                    onClick={() => handleBuyTicket(movie._id)}
                     className="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition-all cursor-pointer"
                   >
                     {t('buyTicket')}
@@ -198,31 +211,33 @@ const getShow = async () => {
         </div>
         
         <div className="relative max-w-4xl mx-auto">
-          <Blurcircle top="-50px" left="-50px" />
-          <Blurcircle bottom="-50px" right="-50px" />
-          
-          <div className="relative bg-black rounded-xl overflow-hidden shadow-2xl">
-            <ReactPlayer
-              url="https://www.youtube.com/watch?v=4LiHg8nUlFw"
-              controls={true}
-              width="100%"
-              height="500px"
-              className="mx-auto"
-              config={{
-                youtube: {
-                  playerVars: {
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0
-                  }
-                }
-              }}
-            />
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <Blurcircle top="-50px" left="-50px" />
+            <Blurcircle bottom="-50px" right="-50px" />
           </div>
+
+          <a
+            href={`https://www.youtube.com/watch?v=${trailerKey || ''}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 block rounded-xl overflow-hidden shadow-2xl group"
+          >
+            <img
+              src={image_base_url + (show.movie.backdrop_path || show.movie.poster_path)}
+              alt={`${show.movie.title} trailer thumbnail`}
+              className="w-full h-[500px] object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-red-600 group-hover:bg-red-700 transition-colors grid place-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-8 h-8"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+          </a>
           
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              {t('watchTrailer')} • {show.movie.title} • {new Date(show.movie.release_date).getFullYear()}
+              {t('watchTrailer')} • {show.movie.title} • {new Date(show.movie.releaseDate).getFullYear()}
             </p>
           </div>
         </div>

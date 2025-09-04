@@ -21,7 +21,7 @@ const List_Books = () => {
         setBookings(data.bookings || []);
         setLoading(false);
       } else {
-        setBookings([]);
+        setBookings(data.bookings);
         setLoading(false);
       }
     } catch (error) {

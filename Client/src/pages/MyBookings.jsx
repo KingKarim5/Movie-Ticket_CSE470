@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Blurcircle from '../components/Blurcircle';
 import { t } from '../libraries/i18n';
 import { useAppContext } from '../context/Appcontext';
@@ -26,16 +27,15 @@ const MyBookings = () => {
   const { axios, getToken, user, image_base_url} = useAppContext()
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const getMyBookings = async () => {
     try {
-      const { data } = await axios.get('/api/user/userbookings', {
+      const { data } = await axios.get('/api/user/bookings', {
         headers: { Authorization: `Bearer ${await getToken()}` }
       });
       if (data.success) {
         setBookings(data.bookings || []);
-      } else {
-        setBookings([]);
       }
     } catch (error) {
       console.log(error);
@@ -79,7 +79,7 @@ const MyBookings = () => {
               <div className='flex items-center gap-4'>
                 <p className='text-2xl font-semibold mb-3'>{currency}{item.amount}</p>
                 {!item.isPaid && (
-                  <button className='bg-purple-600 text-white px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer hover:bg-red-600 transition-colors duration-300'>
+                  <button onClick={() => navigate(`/pay/${item._id}`)} className='bg-purple-600 text-white px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer hover:bg-red-600 transition-colors duration-300'>
                     {t('payNow')}
                   </button>
                 )}

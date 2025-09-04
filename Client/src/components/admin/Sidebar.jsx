@@ -1,4 +1,4 @@
-import { LayoutDashboardIcon, ListCollapseIcon, PlusSquareIcon, ListIcon } from "lucide-react";
+import { LayoutDashboardIcon, ListCollapseIcon, PlusSquareIcon, ListIcon, TagIcon } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
@@ -13,6 +13,7 @@ const Sidebar = () => {
     { name: "Bookings", path: "/admin/bookings", icon: ListCollapseIcon },
     { name: "Shows", path: "/admin/shows", icon: ListIcon },
     { name: "Add Show", path: "/admin/add-show", icon: PlusSquareIcon },
+    { name: "Promos", path: "/admin/promos", icon: TagIcon },
   ];
 
   return (

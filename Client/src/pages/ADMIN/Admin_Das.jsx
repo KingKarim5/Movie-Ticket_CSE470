@@ -33,7 +33,7 @@ const Admin_Das = () => {
 
   const fetchDashboardData = async () => {
       try {
-      const { data } = await axios.get('/api/admin/dashboarddata', {
+      const { data } = await axios.get('/api/admin/dashboard', {
         headers: {
           Authorization: `Bearer ${await getToken()}`
         }

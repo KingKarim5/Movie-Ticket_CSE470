@@ -1,5 +1,6 @@
-import { CalculatorIcon, ClockIcon, SearchIcon } from 'lucide-react';
+import { CalculatorIcon, ClockIcon, SearchIcon, ShoppingCart } from 'lucide-react';
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar'; // ensure path is correct
 
 const Herosec = () => {
@@ -46,14 +47,24 @@ const Herosec = () => {
           />
         </div>
 
-        {/* Vibrant Search Button */}
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 px-5 py-3 mt-6 text-white bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 hover:from-purple-500 hover:via-pink-400 hover:to-red-400 rounded-full font-semibold shadow-lg transition-transform transform hover:scale-105"
-        >
-          <SearchIcon className="w-5 h-5" />
-          Search Movies
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-3 mt-6">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2 px-5 py-3 text-white bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 hover:from-purple-500 hover:via-pink-400 hover:to-red-400 rounded-full font-semibold shadow-lg transition-transform transform hover:scale-105"
+          >
+            <SearchIcon className="w-5 h-5" />
+            Search Movies
+          </button>
+          <Link
+            to="/mybookings"
+            className="flex items-center gap-2 px-5 py-3 text-white bg-red-600 hover:bg-red-700 rounded-full font-semibold shadow-lg transition-transform transform hover:scale-105 border border-white/10 backdrop-blur-sm"
+            aria-label="Open cart / my bookings"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            Cart
+          </Link>
+        </div>
       </div>
 
       {/* Search Overlay */}

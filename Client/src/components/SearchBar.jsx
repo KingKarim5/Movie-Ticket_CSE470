@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SearchIcon, XIcon, FilmIcon, StarIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { dummyShowsData } from '../assets/assets';
+import { useAppContext } from '../context/Appcontext';
 import { t } from '../libraries/i18n';
 
 const SearchBar = ({ isOpen, onClose }) => {
@@ -10,6 +10,7 @@ const SearchBar = ({ isOpen, onClose }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const { shows, image_base_url } = useAppContext();
 
   const generateSuggestions = (query) => {
     if (!query.trim()) {
@@ -19,15 +20,17 @@ const SearchBar = ({ isOpen, onClose }) => {
 
     const lowerQuery = query.toLowerCase();
 
-    const titleMatches = dummyShowsData.filter(movie =>
+    const source = Array.isArray(shows) ? shows : [];
+
+    const titleMatches = source.filter(movie =>
       movie.title.toLowerCase().includes(lowerQuery)
     );
 
-    const genreMatches = dummyShowsData.filter(movie =>
+    const genreMatches = source.filter(movie =>
       movie.genres.some(genre => genre.name.toLowerCase().includes(lowerQuery))
     );
 
-    const castMatches = dummyShowsData.filter(movie =>
+    const castMatches = source.filter(movie =>
       movie.casts.slice(0, 3).some(cast => cast.name.toLowerCase().includes(lowerQuery))
     );
 
@@ -145,7 +148,7 @@ const SearchBar = ({ isOpen, onClose }) => {
                   className="flex items-center p-4 hover:bg-purple-900/30 cursor-pointer border-b border-purple-800 last:border-b-0"
                 >
                   <img
-                    src={movie.poster_path}
+                    src={image_base_url + movie.poster_path}
                     alt={movie.title}
                     className="w-12 h-16 object-cover rounded mr-4 border border-purple-700"
                   />

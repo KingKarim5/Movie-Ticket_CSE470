@@ -10,6 +10,8 @@ const Admin_Add_Shows = () => {
   const { axios, getToken, user, image_base_url} = useAppContext()
   const currency = import.meta.env.VITE_CURRENCY || '$';
   const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [manualMovieId, setManualMovieId] = useState('');
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [dateTimeSelection, setDateTimeSelection] = useState({});
   const [dateTimeInput, setDateTimeInput] = useState('');
@@ -26,11 +28,9 @@ const Admin_Add_Shows = () => {
 
       if (data.success) {
         setNowPlayingMovies(data.movies)
-      } else {
-        toast.error(data.message)
-      }
+      } 
     } catch (error) {
-      console.log(error);
+      console.log('Error fetching the movies', error);
     }
   }
 
@@ -72,7 +72,9 @@ const Admin_Add_Shows = () => {
 
       setAddingShow(true)
       if (!selectedMovie || Object.entries(dateTimeSelection).length === 0 || !showPrice) {
-        return toast.error('Missing required fields')
+        toast.error('Missing required fields')
+        setAddingShow(false)
+        return
       }
       const showsInput = Object.entries(dateTimeSelection).map(([date, times]) => ({ date, time: times }))
       
@@ -104,14 +106,46 @@ const Admin_Add_Shows = () => {
 
   // initial fetch handled in the effect above
 
+  const filteredMovies = nowPlayingMovies.filter(m =>
+    !searchQuery || m.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return nowPlayingMovies.length > 0 ? (
     <>
       <All_Page_Title text1="Add" text2="Movies" />
 
       {/* Now Playing Movies */}
       <p className="mt-10 text-lg font-medium">Now Playing Movies</p>
+      <div className="mt-3 flex items-center gap-3">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by title (e.g., Fantastic)"
+          className="border border-gray-600 px-3 py-2 rounded-md outline-none bg-transparent text-white w-64"
+        />
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={manualMovieId}
+            onChange={(e) => setManualMovieId(e.target.value.trim())}
+            placeholder="TMDB Movie ID (e.g., 823464)"
+            className="border border-gray-600 px-3 py-2 rounded-md outline-none bg-transparent text-white w-64"
+          />
+          <button
+            onClick={() => {
+              if (!manualMovieId) return toast.error('Enter a TMDB movie ID');
+              setSelectedMovie(manualMovieId);
+              toast.success('Movie selected by TMDB ID');
+            }}
+            className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-md"
+          >
+            Select by ID
+          </button>
+        </div>
+      </div>
       <div className="group flex flex-wrap gap-4 mt-4 w-max">
-        {nowPlayingMovies.map((movie) => (
+        {filteredMovies.map((movie) => (
           <div
             key={movie.id}
             className={`relative cursor-pointer group-hover:not-hover:opacity-40 hover:-translate-y-1 transition duration-300 
@@ -142,7 +176,7 @@ const Admin_Add_Shows = () => {
             )}
 
             <p className="font-medium truncate mt-1 text-sm">{movie.title}</p>
-            <p className="text-gray-400 text-xs">{movie.release_date}</p>
+                                    <p className="text-gray-400 text-xs">{movie.releaseDate}</p>
           </div>
         ))}
       </div>

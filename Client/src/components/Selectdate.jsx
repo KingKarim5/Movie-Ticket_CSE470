@@ -35,7 +35,7 @@ const Selectdate = ({ dateTime, id }) => {
 
           {/* Date Grid Layout */}
           <div className="grid grid-cols-7 gap-4 mt-8">
-            {Object.keys(dateTime).map((date, index) => (
+            {dateTime && Object.keys(dateTime).map((date, index) => (
               <button
                 key={index}
                 onClick={() => setSelected(date)} // Set the selected date
